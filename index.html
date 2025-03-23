@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generowanie Historii Mad Libs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input, button {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generowanie Historii Mad Libs</h1>
+    
+    <form id="storyForm">
+        <label for="hero">Imię bohatera:</label>
+        <input type="text" id="hero" name="hero" required><br><br>
+
+        <label for="location">Miejsce:</label>
+        <input type="text" id="location" name="location" required><br><br>
+
+        <label for="object">Przedmiot:</label>
+        <input type="text" id="object" name="object" required><br><br>
+
+        <label for="animal">Zwierzę:</label>
+        <input type="text" id="animal" name="animal" required><br><br>
+
+        <label for="character">Postać:</label>
+        <input type="text" id="character" name="character" required><br><br>
+
+        <label for="adjective">Przymiotnik:</label>
+        <input type="text" id="adjective" name="adjective" required><br><br>
+
+        <label for="verb">Czasownik:</label>
+        <input type="text" id="verb" name="verb" required><br><br>
+
+        <button type="submit">Generuj Historię</button>
+    </form>
+
+    <h2>Wygenerowana Historia:</h2>
+    <p id="story"></p>
+
+    <script>
+        // Funkcja do generowania historii
+        async function generateStory(event) {
+            event.preventDefault();  // Zatrzymanie domyślnej akcji formularza
+
+            const formData = {
+                hero: document.getElementById("hero").value,
+                location: document.getElementById("location").value,
+                object: document.getElementById("object").value,
+                animal: document.getElementById("animal").value,
+                character: document.getElementById("character").value,
+                adjective: document.getElementById("adjective").value,
+                verb: document.getElementById("verb").value,
+            };
+
+            // Wysyłanie danych do OpenAI API
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': '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', // Podaj swój klucz API
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: [
+                        { role: 'system', content: 'You are a creative writer who generates stories based on various inputs such as name, location, object, animal, character, adjective, and verb.' },
+                        { role: 'user', content: `Write a ${getRandomGenre()} story that includes the following elements: hero named ${formData.hero}, location ${formData.location}, object ${formData.object}, animal ${formData.animal}, character ${formData.character}, adjective ${formData.adjective}, and verb ${formData.verb}. The story should have at least 8-10 sentences.` }
+                    ],
+                    max_tokens: 500,
+                }),
+            });
+
+            const data = await response.json();
+            document.getElementById("story").innerText = data.choices[0].message.content;
+        }
+
+        // Funkcja do losowania gatunku
+        function getRandomGenre() {
+            const genres = ['fantasy', 'science fiction', 'horror', 'romance', 'mystery'];
+            return genres[Math.floor(Math.random() * genres.length)];
+        }
+
+        // Dodanie obsługi formularza
+        document.getElementById("storyForm").addEventListener("submit", generateStory);
+    </script>
+</body>
+</html>
